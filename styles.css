@@ -88,8 +88,8 @@ body::before {
 }
 
 .brand img {
-  width: 108px;
-  height: 108px;
+  width: 109px;
+  height: 109px;
   object-fit: contain;
   filter: brightness(0) invert(1) contrast(1.08);
 }
