@@ -1,0 +1,11 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Structura industriala">
+  <rect width="1200" height="900" fill="#101010"/>
+  <g stroke="#383838" stroke-width="12">
+    <line x1="120" y1="780" x2="1080" y2="780"/>
+    <line x1="160" y1="200" x2="160" y2="780"/>
+    <line x1="420" y1="200" x2="420" y2="780"/>
+    <line x1="680" y1="200" x2="680" y2="780"/>
+    <line x1="940" y1="200" x2="940" y2="780"/>
+    <line x1="130" y1="220" x2="970" y2="220"/>
+  </g>
+</svg>
