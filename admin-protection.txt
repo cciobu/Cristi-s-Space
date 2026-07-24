@@ -1,0 +1,28 @@
+// Protection for admin pages - add to .htaccess if using Apache
+
+// Alternative 1: Password protect with .htaccess
+/*
+<FilesMatch "admin.*\.html">
+  AuthType Basic
+  AuthName "Admin Area"
+  AuthUserFile /path/to/.htpasswd
+  Require valid-user
+</FilesMatch>
+*/
+
+// Alternative 2: IP Whitelist (uncomment and add your IP)
+/*
+<FilesMatch "admin.*\.html">
+  Order Deny,Allow
+  Deny from all
+  Allow from 123.456.789.0  # Your IP address
+</FilesMatch>
+*/
+
+// Alternative 3: Redirect admin pages if not localhost (development only)
+/*
+RewriteEngine On
+RewriteCond %{HTTP_HOST} !^localhost
+RewriteCond %{REQUEST_URI} ^/admin-.*\.html$ [NC]
+RewriteRule ^(.*)$ / [R=301,L]
+*/

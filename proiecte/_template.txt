@@ -1,0 +1,12 @@
+PROIECTE DE CREAT:
+1. ✅ canapea-loft.html
+2. ✅ scara-metalica.html
+3. scaune-industrial.html
+4. consola-metalica.html
+5. balustrada-exterioara.html
+6. raft-industrial.html
+7. cuier-metalic.html
+8. scara-premium.html
+9. balustrada-interioara.html
+
+TOTAL: 9 proiecte individuale

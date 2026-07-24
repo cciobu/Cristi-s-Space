@@ -110,4 +110,51 @@
       });
     });
   }
+
+  // Cookie Consent Banner
+  const cookieBanner = document.getElementById("cookie-banner");
+  const cookieAccept = document.getElementById("cookie-accept");
+  const cookieDecline = document.getElementById("cookie-decline");
+
+  if (cookieBanner && cookieAccept && cookieDecline) {
+    const cookieConsent = localStorage.getItem("cookieConsent");
+
+    if (!cookieConsent) {
+      setTimeout(() => {
+        cookieBanner.style.display = "block";
+      }, 1500);
+    }
+
+    cookieAccept.addEventListener("click", () => {
+      localStorage.setItem("cookieConsent", "accepted");
+      cookieBanner.style.display = "none";
+      if (typeof gtag !== 'undefined') {
+        gtag('consent', 'update', {
+          'analytics_storage': 'granted'
+        });
+      }
+    });
+
+    cookieDecline.addEventListener("click", () => {
+      localStorage.setItem("cookieConsent", "declined");
+      cookieBanner.style.display = "none";
+      if (typeof gtag !== 'undefined') {
+        gtag('consent', 'update', {
+          'analytics_storage': 'denied'
+        });
+      }
+    });
+  }
+
+  // Lazy loading for images
+  if ('loading' in HTMLImageElement.prototype) {
+    const images = document.querySelectorAll('img[loading="lazy"]');
+    images.forEach(img => {
+      img.src = img.dataset.src || img.src;
+    });
+  } else {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js';
+    document.body.appendChild(script);
+  }
 });

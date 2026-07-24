@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Admin | Cristi's Space</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="logo.PNG">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .login-container {
+      max-width: 420px;
+      margin: 120px auto;
+      padding: 40px;
+    }
+    .login-form {
+      display: grid;
+      gap: 16px;
+    }
+    .login-form input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      background: #0f0f0f;
+      color: #f1f1f1;
+      border-radius: 10px;
+      font: inherit;
+      font-size: 1rem;
+    }
+    .login-form input:focus {
+      outline: none;
+      border-color: rgba(227, 179, 95, 0.65);
+      box-shadow: 0 0 0 3px rgba(227, 179, 95, 0.14);
+    }
+    .login-form button {
+      width: 100%;
+      padding: 14px 24px;
+      font-size: 1rem;
+    }
+    .error-message {
+      background: rgba(220, 38, 38, 0.1);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      color: #fca5a5;
+      padding: 12px 16px;
+      border-radius: 10px;
+      display: none;
+      text-align: center;
+    }
+    .error-message.show {
+      display: block;
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .login-header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+    .login-header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container card">
+    <div class="login-header">
+      <h1>🔐 Admin Login</h1>
+      <p>Acces restricționat la panoul de administrare</p>
+    </div>
+
+    <div id="error-message" class="error-message">
+      Nume utilizator sau parolă incorectă
+    </div>
+
+    <form id="login-form" class="login-form">
+      <div>
+        <label for="username" style="display: block; margin-bottom: 6px; color: #e0e0e0;">Nume utilizator</label>
+        <input type="text" id="username" name="username" placeholder="Introdu numele de utilizator" required autocomplete="username">
+      </div>
+
+      <div>
+        <label for="password" style="display: block; margin-bottom: 6px; color: #e0e0e0;">Parolă</label>
+        <input type="password" id="password" name="password" placeholder="Introdu parola" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="btn btn-primary">Conectează-te</button>
+    </form>
+
+    <div style="margin-top: 24px; text-align: center; color: var(--muted); font-size: 0.9rem;">
+      <p>Ai uitat parola? Contactează administratorul.</p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errorMessage = document.getElementById('error-message');
+
+      // IMPORTANT: Schimbă aceste credențiale înainte de a urca site-ul!
+      // Pentru securitate maximă, folosește un backend real
+      const ADMIN_USERNAME = 'cristi';
+      const ADMIN_PASSWORD = 'Cristi@Space2026!';
+
+      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        // Salvează sesiunea
+        sessionStorage.setItem('adminLoggedIn', 'true');
+        sessionStorage.setItem('adminUsername', username);
+        sessionStorage.setItem('loginTime', new Date().getTime());
+
+        // Redirecționează către dashboard
+        window.location.href = 'admin-dashboard.html';
+      } else {
+        errorMessage.classList.add('show');
+
+        // Ascunde mesajul după 3 secunde
+        setTimeout(() => {
+          errorMessage.classList.remove('show');
+        }, 3000);
+
+        // Șterge câmpurile
+        document.getElementById('password').value = '';
+        document.getElementById('password').focus();
+      }
+    });
+
+    // Verifică dacă e deja logat
+    if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+      window.location.href = 'admin-dashboard.html';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Cristi's Space</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="logo.PNG">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .admin-topbar {
+      background: rgba(16, 16, 16, 0.98);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .admin-header h1 {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+    .admin-user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .admin-tabs {
+      display: flex;
+      gap: 8px;
+      margin: 24px 0;
+      border-bottom: 1px solid var(--line);
+      flex-wrap: wrap;
+    }
+    .admin-tab {
+      padding: 12px 20px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      transition: all .25s ease;
+    }
+    .admin-tab:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .admin-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .admin-content {
+      display: none;
+      animation: fadeIn .3s ease;
+    }
+    .admin-content.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, rgba(227, 179, 95, 0.08), rgba(255, 140, 47, 0.05));
+      border: 1px solid rgba(227, 179, 95, 0.2);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 8px 0;
+    }
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .requests-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .requests-table th,
+    .requests-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+    .requests-table th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+    .requests-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .badge-new { background: rgba(34, 197, 94, 0.15); color: #86efac; }
+    .badge-read { background: rgba(100, 116, 139, 0.15); color: #cbd5e1; }
+    .portfolio-upload {
+      border: 2px dashed var(--line);
+      border-radius: 14px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .3s ease;
+    }
+    .portfolio-upload:hover {
+      border-color: var(--accent);
+      background: rgba(227, 179, 95, 0.05);
+    }
+    .portfolio-upload input[type="file"] {
+      display: none;
+    }
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .portfolio-item {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      aspect-ratio: 1;
+    }
+    .portfolio-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .portfolio-item-actions {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      padding: 12px;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    .portfolio-item:hover .portfolio-item-actions {
+      opacity: 1;
+    }
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      border-radius: 6px;
+    }
+    .btn-danger {
+      background: #dc2626;
+      color: #fff;
+      border: none;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+    .projects-list {
+      display: grid;
+      gap: 12px;
+    }
+    .project-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      transition: all .25s ease;
+    }
+    .project-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(227, 179, 95, 0.4);
+    }
+    .project-item-info {
+      flex: 1;
+    }
+    .project-item-title {
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .project-item-meta {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn .3s ease;
+    }
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp .3s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--line);
+    }
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 2rem;
+      cursor: pointer;
+      padding: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: all .2s ease;
+    }
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+    .modal-body {
+      padding: 24px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #e0e0e0;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      background: #0f0f0f;
+      color: #f1f1f1;
+      border-radius: 8px;
+      font: inherit;
+      font-size: 0.95rem;
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .image-upload-area {
+      border: 2px dashed var(--line);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .3s ease;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .image-upload-area:hover {
+      border-color: var(--accent);
+      background: rgba(227, 179, 95, 0.05);
+    }
+    .image-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .image-preview-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+    .image-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .image-preview-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(220, 38, 38, 0.95);
+      color: #fff;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .image-preview-item:hover .image-preview-remove {
+      opacity: 1;
+    }
+    .image-preview-main {
+      position: relative;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+      aspect-ratio: 4/3;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid var(--accent);
+    }
+    .image-preview-main img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .badge-main {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: var(--accent);
+      color: #000;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-topbar">
+    <div class="container">
+      <div class="admin-header">
+        <h1>🎛️ Admin Dashboard</h1>
+        <div class="admin-user-info">
+          <span>👤 <span id="admin-username">Admin</span></span>
+          <button class="btn btn-ghost btn-small" onclick="logout()">Deconectare</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="padding: 32px 0;">
+    <!-- Statistics -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Cereri Noi</div>
+        <div class="stat-value" id="new-requests-count">0</div>
+        <p style="color: var(--muted); font-size: 0.85rem; margin-top: 8px;">În ultimele 30 zile</p>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Imagini Portofoliu</div>
+        <div class="stat-value" id="portfolio-count">9</div>
+        <p style="color: var(--muted); font-size: 0.85rem; margin-top: 8px;">Total în galerie</p>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Vizitatori</div>
+        <div class="stat-value">--</div>
+        <p style="color: var(--muted); font-size: 0.85rem; margin-top: 8px;">Configurează GA</p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="requests">📨 Cereri Contact</button>
+      <button class="admin-tab" data-tab="portfolio">🖼️ Gestionare Portofoliu</button>
+      <button class="admin-tab" data-tab="projects">✏️ Editare Proiecte</button>
+      <button class="admin-tab" data-tab="settings">⚙️ Setări</button>
+    </div>
+
+    <!-- Tab: Cereri Contact -->
+    <div id="requests-content" class="admin-content active">
+      <div class="card">
+        <h2 style="margin-bottom: 16px;">Cereri de contact</h2>
+        <p style="color: var(--muted); margin-bottom: 24px;">
+          Formularele sunt gestionate prin <strong>Formspree</strong>.
+          <a href="https://formspree.io/forms/mvzbqnjz/submissions" target="_blank" rel="noopener" style="color: var(--accent);">
+            Vezi toate cererile pe Formspree →
+          </a>
+        </p>
+
+        <div class="empty-state">
+          <div class="empty-state-icon">📬</div>
+          <h3>Cererile sunt gestionate extern</h3>
+          <p style="margin: 16px 0;">Pentru a vedea și gestiona cererile de contact, accesează:</p>
+          <a href="https://formspree.io/forms/mvzbqnjz/submissions" target="_blank" rel="noopener" class="btn btn-primary">
+            Deschide Formspree Dashboard
+          </a>
+          <div style="margin-top: 24px; padding: 20px; background: rgba(227, 179, 95, 0.05); border-radius: 12px; border: 1px solid rgba(227, 179, 95, 0.2);">
+            <p style="color: #e0e0e0; margin-bottom: 8px;"><strong>💡 Sfat:</strong></p>
+            <p style="color: var(--muted); font-size: 0.9rem;">
+              Vei primi notificări automate prin email pentru fiecare cerere nouă.
+              Poți configura notificări și în panoul Formspree.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Portofoliu -->
+    <div id="portfolio-content" class="admin-content">
+      <div class="card">
+        <h2 style="margin-bottom: 16px;">Gestionare Portofoliu</h2>
+
+        <label for="file-upload" class="portfolio-upload">
+          <input type="file" id="file-upload" accept="image/*" multiple onchange="handleFileUpload(event)">
+          <div style="font-size: 3rem; margin-bottom: 12px;">📤</div>
+          <h3 style="margin-bottom: 8px;">Încarcă imagini noi</h3>
+          <p style="color: var(--muted);">Click aici sau drag & drop (JPG, PNG max 5MB)</p>
+        </label>
+
+        <h3 style="margin-top: 32px; margin-bottom: 16px;">Imagini curente în portofoliu</h3>
+        <div id="portfolio-grid" class="portfolio-grid">
+          <!-- Va fi populat dinamic -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Editare Proiecte -->
+    <div id="projects-content" class="admin-content">
+      <div class="card">
+        <h2 style="margin-bottom: 16px;">✏️ Editare Proiecte</h2>
+        <p style="color: var(--muted); margin-bottom: 24px;">Selectează un proiect pentru a edita descrierile, caracteristicile tehnice și alte detalii.</p>
+
+        <div id="projects-list" class="projects-list">
+          <!-- Va fi populat dinamic -->
+        </div>
+      </div>
+
+      <!-- Project Editor Modal -->
+      <div id="project-editor-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 id="modal-project-title">Editează Proiect</h2>
+            <button class="modal-close" onclick="closeProjectEditor()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="project-edit-form" class="form">
+              <input type="hidden" id="edit-project-id">
+
+              <div class="form-group">
+                <label for="edit-title">Titlu Proiect</label>
+                <input type="text" id="edit-title" placeholder="Ex: Canapea Loft Metal & Lemn" required>
+              </div>
+
+              <div class="form-group">
+                <label for="edit-category">Categorie</label>
+                <input type="text" id="edit-category" placeholder="Ex: Mobilier Loft" required>
+              </div>
+
+              <div class="form-group">
+                <label for="edit-lead">Descriere Scurtă (Lead)</label>
+                <textarea id="edit-lead" rows="2" placeholder="Descriere scurtă care apare sub titlu" required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="edit-description">Descriere Detaliată</label>
+                <textarea id="edit-description" rows="6" placeholder="Descriere completă a proiectului" required></textarea>
+              </div>
+
+              <!-- IMAGE MANAGEMENT SECTION -->
+              <div class="form-group">
+                <label>🖼️ Gestionare Imagini</label>
+                <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 12px;">Imaginea principală a proiectului + galerie foto.</p>
+
+                <div style="margin-bottom: 16px;">
+                  <label style="font-size: 0.9rem; color: var(--muted); font-weight: 500;">Imagine Principală (Hero):</label>
+                  <div id="main-image-preview" class="image-preview-main" style="margin-top: 8px;">
+                    <!-- Va fi populat dinamic -->
+                  </div>
+                  <button type="button" class="btn btn-ghost" style="width: 100%; margin-top: 12px;" onclick="changeMainImage()">
+                    🔄 Schimbă Imagine Principală
+                  </button>
+                </div>
+
+                <div>
+                  <label style="font-size: 0.9rem; color: var(--muted); font-weight: 500; margin-bottom: 8px; display: block;">Galerie Foto (3 imagini recomandate):</label>
+
+                  <div class="image-upload-area" onclick="document.getElementById('gallery-upload').click()">
+                    <input type="file" id="gallery-upload" accept="image/*" multiple style="display: none;" onchange="handleGalleryUpload(event)">
+                    <div style="font-size: 2rem; margin-bottom: 8px;">📸</div>
+                    <p style="color: var(--muted); margin: 0;">Click pentru a adăuga imagini în galerie</p>
+                    <p style="color: var(--muted); font-size: 0.85rem; margin-top: 4px;">(JPG, PNG max 5MB)</p>
+                  </div>
+
+                  <div id="gallery-images-preview" class="image-preview-grid">
+                    <!-- Va fi populat dinamic -->
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="edit-characteristics">Caracteristici Tehnice (câte una pe linie)</label>
+                <textarea id="edit-characteristics" rows="8" placeholder="Dimensiuni: L 200cm x H 85cm&#10;Material: Profil tubular oțel&#10;Finisaj: Vopsea pulbere negru mat" required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="edit-client">Client</label>
+                <input type="text" id="edit-client" placeholder="Ex: Showroom Design, Chișinău">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                  <label for="edit-date">Data Finalizare</label>
+                  <input type="text" id="edit-date" placeholder="Ex: Februarie 2026">
+                </div>
+
+                <div class="form-group">
+                  <label for="edit-duration">Durată</label>
+                  <input type="text" id="edit-duration" placeholder="Ex: 5 zile">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="edit-location">Locație</label>
+                <input type="text" id="edit-location" placeholder="Ex: Chișinău, Moldova">
+              </div>
+
+              <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Salvează Toate Modificările</button>
+                <button type="button" class="btn btn-ghost" onclick="closeProjectEditor()">Anulează</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Setări -->
+    <div id="settings-content" class="admin-content">
+      <div class="card">
+        <h2 style="margin-bottom: 16px;">⚙️ Setări Admin</h2>
+
+        <div style="margin-bottom: 24px;">
+          <h3>Schimbă parola</h3>
+          <p style="color: var(--muted); margin-bottom: 12px;">Pentru securitate, schimbă parola periodic</p>
+          <form id="change-password-form" class="form" style="max-width: 400px;">
+            <input type="password" placeholder="Parola curentă" required>
+            <input type="password" placeholder="Parola nouă" required>
+            <input type="password" placeholder="Confirmă parola nouă" required>
+            <button type="submit" class="btn btn-primary">Actualizează Parola</button>
+          </form>
+        </div>
+
+        <div style="margin-top: 32px; padding: 20px; background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 12px;">
+          <h3 style="color: #fca5a5; margin-bottom: 8px;">⚠️ Atenție: Securitate</h3>
+          <p style="color: #fca5a5; font-size: 0.9rem; margin-bottom: 12px;">
+            Acest sistem de admin este <strong>doar pentru demonstrație</strong>. Pentru un site de producție,
+            recomandăm folosirea unui backend real (PHP, Node.js, WordPress) sau servicii CMS precum:
+          </p>
+          <ul style="color: #fca5a5; font-size: 0.9rem; margin-left: 20px;">
+            <li><strong>Netlify CMS</strong> - gratuit, simplu de integrat</li>
+            <li><strong>Strapi</strong> - CMS headless profesional</li>
+            <li><strong>WordPress</strong> - cel mai popular CMS</li>
+          </ul>
+        </div>
+
+        <div style="margin-top: 24px;">
+          <h3>Informații sistem</h3>
+          <table style="width: 100%; max-width: 500px; margin-top: 12px;">
+            <tr style="border-bottom: 1px solid var(--line);">
+              <td style="padding: 8px 0; color: var(--muted);">Browser:</td>
+              <td id="browser-info" style="padding: 8px 0;">-</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--line);">
+              <td style="padding: 8px 0; color: var(--muted);">Data login:</td>
+              <td id="login-time" style="padding: 8px 0;">-</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: var(--muted);">Sesiune:</td>
+              <td style="padding: 8px 0; color: #86efac;">Activă</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+# Robots.txt pentru Cristi's Space
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://cristispace.com/sitemap.xml
+
+# Dezactivează crawlarea paginilor admin (IMPORTANT - securitate)
+User-agent: *
+Disallow: /admin-login.html
+Disallow: /admin-dashboard.html
+Disallow: /admin-test.html
+Disallow: /admin.js
+
+# Dezactivează crawlarea paginilor de politici (opțional)
+Disallow: /politica-confidentialitate.html
+Disallow: /politica-cookies.html
+Disallow: /termeni-conditii.html
