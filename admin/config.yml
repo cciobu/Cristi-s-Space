@@ -1,0 +1,25 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "img"
+public_folder: "img"
+
+collections:
+  - name: "proiecte"
+    label: "Proiecte"
+    folder: "proiecte"
+    create: false
+    slug: "{{slug}}"
+    fields:
+      - {label: "Titlu", name: "title", widget: "string"}
+      - {label: "Categorie", name: "category", widget: "string"}
+      - {label: "Descriere Scurtă", name: "lead", widget: "text"}
+      - {label: "Descriere Detaliată", name: "description", widget: "markdown"}
+      - {label: "Caracteristici", name: "characteristics", widget: "list"}
+      - {label: "Client", name: "client", widget: "string"}
+      - {label: "Data", name: "date", widget: "string"}
+      - {label: "Durată", name: "duration", widget: "string"}
+      - {label: "Locație", name: "location", widget: "string"}
+      - {label: "Imagine Principală", name: "image", widget: "image"}
+      - {label: "Galerie", name: "gallery", widget: "list", field: {label: "Imagine", name: "image", widget: "image"}}

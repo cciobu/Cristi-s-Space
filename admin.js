@@ -486,23 +486,59 @@ function changeMainImage() {
       return;
     }
 
-    // Show preview
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      loadMainImagePreview(event.target.result);
+    // Check if PHP backend available
+    if (typeof PHP_BACKEND_AVAILABLE !== 'undefined' && PHP_BACKEND_AVAILABLE) {
+      // Upload to server
+      uploadImageToServer(file, function(url) {
+        loadMainImagePreview(url);
 
-      // Store in project data temporarily
-      const projectId = document.getElementById('edit-project-id').value;
-      const project = projectsData.find(p => p.id === projectId);
-      if (project) {
-        project.image = event.target.result;
-      }
-    };
-    reader.readAsDataURL(file);
+        const projectId = document.getElementById('edit-project-id').value;
+        const project = projectsData.find(p => p.id === projectId);
+        if (project) {
+          project.image = url;
+        }
 
-    alert('✅ Imagine principală actualizată!\n\n⚠️ Pentru demonstrație, imaginea este încărcată în browser. Într-un sistem real cu backend, ar fi încărcată pe server și calea ar fi salvată în baza de date.');
+        alert('✅ Imagine principală încărcată pe server și gata de salvare!');
+      });
+    } else {
+      // Local preview only (demo mode)
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        loadMainImagePreview(event.target.result);
+
+        const projectId = document.getElementById('edit-project-id').value;
+        const project = projectsData.find(p => p.id === projectId);
+        if (project) {
+          project.image = event.target.result;
+        }
+      };
+      reader.readAsDataURL(file);
+
+      alert('✅ Imagine principală actualizată în preview!\n\n⚠️ Pentru încărcare reală pe server, ai nevoie de backend PHP.');
+    }
   };
   input.click();
+}
+
+function uploadImageToServer(file, callback) {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  fetch('api/upload-image.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(result => {
+    if (result.success) {
+      callback(result.url);
+    } else {
+      alert(`❌ Eroare la upload: ${result.error}`);
+    }
+  })
+  .catch(error => {
+    alert(`❌ Eroare de conexiune: ${error.message}`);
+  });
 }
 
 function loadGalleryImagesPreview(images) {
@@ -598,19 +634,73 @@ function saveProjectEdits() {
     client: document.getElementById('edit-client').value,
     date: document.getElementById('edit-date').value,
     duration: document.getElementById('edit-duration').value,
-    location: document.getElementById('edit-location').value
+    location: document.getElementById('edit-location').value,
+    image: project.image,
+    gallery: project.gallery || []
   };
 
-  // Update project data
+  // Verifică dacă există backend PHP
+  if (typeof PHP_BACKEND_AVAILABLE !== 'undefined' && PHP_BACKEND_AVAILABLE) {
+    // Salvare cu backend PHP
+    saveProjectWithBackend(projectId, updatedData);
+  } else {
+    // Salvare doar în memorie (demo)
+    saveProjectInMemory(project, updatedData);
+  }
+}
+
+function saveProjectWithBackend(projectId, data) {
+  // Show loading
+  const btn = document.querySelector('#project-edit-form button[type="submit"]');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Salvare...';
+  btn.disabled = true;
+
+  // Trimite către API PHP
+  fetch('api/save-project.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      projectId: projectId,
+      data: data
+    })
+  })
+  .then(response => response.json())
+  .then(result => {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+
+    if (result.success) {
+      alert(`✅ Proiectul "${data.title}" a fost salvat cu succes!\n\n✨ Modificările sunt LIVE pe site! Reîmprospătează pagina proiectului pentru a vedea schimbările.`);
+
+      // Update local data
+      const project = projectsData.find(p => p.id === projectId);
+      Object.assign(project, data);
+
+      closeProjectEditor();
+      loadProjectsList();
+      loadPortfolioImages();
+    } else {
+      alert(`❌ Eroare la salvare: ${result.error || 'Eroare necunoscută'}`);
+    }
+  })
+  .catch(error => {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    alert(`❌ Eroare de conexiune: ${error.message}\n\nVerifică dacă backend-ul PHP funcționează.`);
+  });
+}
+
+function saveProjectInMemory(project, updatedData) {
+  // Update project data in memory only
   Object.assign(project, updatedData);
 
-  // Show success message
-  alert(`✅ Modificările pentru "${project.title}" au fost salvate!\n\n⚠️ IMPORTANT: Într-un sistem real, aceste modificări ar fi salvate în baza de date și actualizate automat în fișierele HTML.\n\nPentru DEMO, modificările rămân doar în memorie (se pierd la refresh). Pentru a aplica permanent modificările, trebuie să:\n\n1. Copiezi conținutul editat din formular\n2. Actualizezi manual fișierul HTML corespunzător din folderul /proiecte/\n3. SAU implementezi un backend (PHP/Node.js) pentru salvare automată`);
+  // Show message
+  alert(`✅ Modificările pentru "${project.title}" au fost salvate în memorie!\n\n⚠️ ATENȚIE: Pentru salvare PERMANENTĂ și live pe site, ai nevoie de backend PHP.\n\nMomentul actual:\n• Modificările rămân doar în browser\n• Se pierd la refresh\n• Nu sunt vizibile pe site public\n\nPentru salvare reală:\n1. Instalează fișierele PHP din /api/\n2. Configurează server PHP (XAMPP, WAMP, sau hosting)\n3. Modificările vor fi automat live pe site!`);
 
-  // Close modal
   closeProjectEditor();
-
-  // Reload projects list
   loadProjectsList();
 
   // Update portfolio if title changed
