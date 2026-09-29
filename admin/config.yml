@@ -1,6 +1,6 @@
 backend:
   name: git-gateway
-  branch: main
+  branch: vercel/set-up-vercel-web-analytics-in-tyc1r8
 
 media_folder: "img"
 public_folder: "img"
