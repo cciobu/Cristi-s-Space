@@ -640,6 +640,10 @@ h1 {
   background: #d6c9ae;
 }
 
+.lift-feature-visual:hover .lift-cable {
+  animation: lift-cable-travel 2s ease-in-out infinite alternate;
+}
+
 .lift-platform {
   top: 38%;
   left: 8%;
@@ -652,10 +656,31 @@ h1 {
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.45);
 }
 
+.lift-feature-visual:hover .lift-platform {
+  animation: lift-platform-travel 2s ease-in-out infinite alternate;
+}
+
 .lift-platform span {
   width: 3px;
   height: 30px;
   background: #a89b80;
+}
+
+@keyframes lift-platform-travel {
+  from { top: 38%; }
+  to { top: 66%; }
+}
+
+@keyframes lift-cable-travel {
+  from { height: 38%; }
+  to { height: 66%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift-feature-visual:hover .lift-platform,
+  .lift-feature-visual:hover .lift-cable {
+    animation: none;
+  }
 }
 
 .lift-video-frame,
